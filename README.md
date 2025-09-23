@@ -651,15 +651,17 @@ curl -X GET "http://localhost:3000/api/admin/users/68d2c19972b14b75635218ea" \
   "success": true,
   "data": {
     "user": {
-      "_id": "68d2c19972b14b75635218ea",
-      "username": "aug",
-      "email": "aug@example.com",
-      "role": "user",
+      "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+      "username": "johndoe",
+      "email": "john@example.com",
+      "role": "admin",
       "isActive": true,
       "loginAttempts": 0,
-      "createdAt": "2025-09-23T15:49:45.167Z",
-      "updatedAt": "2025-09-23T15:49:45.454Z"
-    }
+      "createdAt": "2025-09-23T00:24:49.503Z",
+      "updatedAt": "2025-09-23T15:48:02.400Z",
+      "lastLogin": "2025-09-23T15:48:02.340Z",
+      "lastLoginIP": "::1"
+    },
   }
 }
 ```

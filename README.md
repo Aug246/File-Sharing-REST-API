@@ -122,6 +122,17 @@ Content-Type: application/json
 }
 ```
 
+**Terminal Command:**
+```bash
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "SecurePass123!"
+  }'
+```
+
 #### Login
 ```http
 POST /api/auth/login
@@ -131,6 +142,16 @@ Content-Type: application/json
   "usernameOrEmail": "johndoe",
   "password": "SecurePass123!"
 }
+```
+
+**Terminal Command:**
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "usernameOrEmail": "johndoe",
+    "password": "SecurePass123!"
+  }'
 ```
 
 #### Refresh Token
@@ -143,6 +164,15 @@ Content-Type: application/json
 }
 ```
 
+**Terminal Command:**
+```bash
+curl -X POST http://localhost:3000/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "your-refresh-token"
+  }'
+```
+
 #### Logout
 ```http
 POST /api/auth/logout
@@ -152,6 +182,16 @@ Content-Type: application/json
 {
   "refreshToken": "your-refresh-token"
 }
+```
+
+**Terminal Command:**
+```bash
+curl -X POST http://localhost:3000/api/auth/logout \
+  -H "Authorization: Bearer your-access-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "your-refresh-token"
+  }'
 ```
 
 ### File Management Endpoints
@@ -168,10 +208,30 @@ tags: "tag1,tag2,tag3"
 isPublic: false
 ```
 
+**Terminal Command:**
+```bash
+# Create a test file first
+echo "This is a test file content" > test-file.txt
+
+# Upload file
+curl -X POST http://localhost:3000/api/files/upload \
+  -H "Authorization: Bearer your-access-token" \
+  -F "file=@test-file.txt" \
+  -F "description=File description" \
+  -F "tags=tag1,tag2,tag3" \
+  -F "isPublic=false"
+```
+
 #### Get User Files
 ```http
 GET /api/files/my-files?page=1&limit=10&search=document
 Authorization: Bearer your-access-token
+```
+
+**Terminal Command:**
+```bash
+curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10&search=document" \
+  -H "Authorization: Bearer your-access-token"
 ```
 
 #### Get Public Files
@@ -179,10 +239,22 @@ Authorization: Bearer your-access-token
 GET /api/files/public?page=1&limit=20&tag=pdf
 ```
 
+**Terminal Command:**
+```bash
+curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20&tag=pdf"
+```
+
 #### Download File
 ```http
 GET /api/files/:fileId/download
 Authorization: Bearer your-access-token
+```
+
+**Terminal Command:**
+```bash
+curl -X GET http://localhost:3000/api/files/FILE_ID/download \
+  -H "Authorization: Bearer your-access-token" \
+  -o downloaded-file.txt
 ```
 
 #### Update File Metadata
@@ -198,10 +270,28 @@ Content-Type: application/json
 }
 ```
 
+**Terminal Command:**
+```bash
+curl -X PUT http://localhost:3000/api/files/FILE_ID \
+  -H "Authorization: Bearer your-access-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Updated description",
+    "tags": "updated,tags",
+    "isPublic": true
+  }'
+```
+
 #### Delete File
 ```http
 DELETE /api/files/:fileId
 Authorization: Bearer your-access-token
+```
+
+**Terminal Command:**
+```bash
+curl -X DELETE http://localhost:3000/api/files/FILE_ID \
+  -H "Authorization: Bearer your-access-token"
 ```
 
 ### Admin Endpoints
@@ -210,6 +300,12 @@ Authorization: Bearer your-access-token
 ```http
 GET /api/admin/users?page=1&limit=20&search=john
 Authorization: Bearer admin-access-token
+```
+
+**Terminal Command:**
+```bash
+curl -X GET "http://localhost:3000/api/admin/users?page=1&limit=20&search=john" \
+  -H "Authorization: Bearer admin-access-token"
 ```
 
 #### Update User Status
@@ -223,11 +319,161 @@ Content-Type: application/json
 }
 ```
 
+**Terminal Command:**
+```bash
+curl -X PUT http://localhost:3000/api/admin/users/USER_ID/status \
+  -H "Authorization: Bearer admin-access-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "isActive": false
+  }'
+```
+
 #### Get System Statistics
 ```http
 GET /api/admin/stats
 Authorization: Bearer admin-access-token
 ```
+
+**Terminal Command:**
+```bash
+curl -X GET http://localhost:3000/api/admin/stats \
+  -H "Authorization: Bearer admin-access-token"
+```
+
+### Basic Health Check Endpoints
+
+#### Server Health
+```http
+GET /health
+```
+
+**Terminal Command:**
+```bash
+curl http://localhost:3000/health
+```
+
+#### API Information
+```http
+GET /
+```
+
+**Terminal Command:**
+```bash
+curl http://localhost:3000/
+```
+
+### Complete Testing Workflow
+
+Here's a complete workflow to test the entire API:
+
+```bash
+#!/bin/bash
+
+# 1. Check server health
+echo "1. Checking server health..."
+curl -s http://localhost:3000/health | jq .
+
+# 2. Register a user
+echo "2. Registering user..."
+REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "TestPass123!"
+  }')
+
+echo $REGISTER_RESPONSE | jq .
+
+# Extract access token
+ACCESS_TOKEN=$(echo $REGISTER_RESPONSE | jq -r '.data.accessToken')
+echo "Access Token: $ACCESS_TOKEN"
+
+# 3. Upload a file
+echo "3. Uploading file..."
+echo "Test file content for API testing" > test-file.txt
+
+UPLOAD_RESPONSE=$(curl -s -X POST http://localhost:3000/api/files/upload \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -F "file=@test-file.txt" \
+  -F "description=API test file" \
+  -F "tags=test,api" \
+  -F "isPublic=false")
+
+echo $UPLOAD_RESPONSE | jq .
+
+# Extract file ID
+FILE_ID=$(echo $UPLOAD_RESPONSE | jq -r '.data.file._id')
+echo "File ID: $FILE_ID"
+
+# 4. List user's files
+echo "4. Listing user files..."
+curl -s -X GET http://localhost:3000/api/files/my-files \
+  -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
+
+# 5. Download file
+echo "5. Downloading file..."
+curl -s -X GET http://localhost:3000/api/files/$FILE_ID/download \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -o downloaded-test-file.txt
+
+echo "File downloaded as downloaded-test-file.txt"
+
+# 6. Update file metadata
+echo "6. Updating file metadata..."
+curl -s -X PUT http://localhost:3000/api/files/$FILE_ID \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Updated test file",
+    "isPublic": true
+  }' | jq .
+
+# 7. Delete file
+echo "7. Deleting file..."
+curl -s -X DELETE http://localhost:3000/api/files/$FILE_ID \
+  -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
+
+# 8. Logout
+echo "8. Logging out..."
+curl -s -X POST http://localhost:3000/api/auth/logout \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "'$(echo $REGISTER_RESPONSE | jq -r '.data.refreshToken')'"
+  }' | jq .
+
+# Cleanup
+rm -f test-file.txt downloaded-test-file.txt
+
+echo "Complete API workflow test finished!"
+```
+
+### Testing Tips
+
+1. **Install jq for better JSON formatting:**
+   ```bash
+   # macOS
+   brew install jq
+   
+   # Ubuntu/Debian
+   sudo apt-get install jq
+   ```
+
+2. **Save the workflow script:**
+   ```bash
+   # Save the complete workflow as a script
+   curl -s [script_url] > test-api.sh
+   chmod +x test-api.sh
+   ./test-api.sh
+   ```
+
+3. **Use environment variables for tokens:**
+   ```bash
+   export ACCESS_TOKEN="your-token-here"
+   curl -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:3000/api/files/my-files
+   ```
 
 ## 🔧 Configuration
 

@@ -2,9 +2,9 @@
 
 A robust, secure file-sharing REST API built with Express.js and MongoDB, featuring comprehensive security measures, role-based access control, and advanced file management capabilities.
 
-## ✨ Features
+## Features
 
-### 🔐 Security Features
+### Security Features
 - **JWT Authentication** with access and refresh tokens
 - **Role-based Access Control** (User/Admin roles)
 - **Rate Limiting** to prevent abuse
@@ -15,7 +15,7 @@ A robust, secure file-sharing REST API built with Express.js and MongoDB, featur
 - **CORS Protection** with configurable origins
 - **File Integrity** verification with checksums
 
-### 📁 File Management
+### File Management
 - **Secure File Upload** with randomized filenames
 - **File Metadata** storage and management
 - **Public/Private** file sharing options
@@ -24,7 +24,7 @@ A robust, secure file-sharing REST API built with Express.js and MongoDB, featur
 - **Bulk Operations** support
 - **File Size & Type** restrictions
 
-### 👥 User Management
+### User Management
 - **User Registration & Authentication**
 - **Profile Management** with validation
 - **Password Change** functionality
@@ -32,7 +32,7 @@ A robust, secure file-sharing REST API built with Express.js and MongoDB, featur
 - **Admin Panel** for user management
 - **Activity Logging** and monitoring
 
-### 🛡️ Advanced Security
+### Advanced Security
 - **OWASP Top 10** compliance considerations
 - **SQL Injection** prevention
 - **XSS Protection** with input sanitization
@@ -40,7 +40,7 @@ A robust, secure file-sharing REST API built with Express.js and MongoDB, featur
 - **Directory Traversal** prevention
 - **Malicious File** detection patterns
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js (v14 or higher)
@@ -101,7 +101,7 @@ A robust, secure file-sharing REST API built with Express.js and MongoDB, featur
    npm start
    ```
 
-## 📚 API Documentation
+## API Documentation
 
 ### Base URL
 ```
@@ -834,7 +834,7 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
    curl -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:3000/api/files/my-files | jq .
    ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -855,7 +855,7 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
 | `MAX_LOGIN_ATTEMPTS` | Max failed login attempts | 5 |
 | `LOCKOUT_TIME_MS` | Account lockout duration | 1800000 (30 min) |
 
-## 🛡️ Security Considerations
+## Security Considerations
 
 ### Implemented Security Measures
 
@@ -910,7 +910,7 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
    - Monitor failed login attempts
    - Track file access patterns
 
-## 🧪 Testing
+## Testing
 
 ### Manual Testing Checklist
 
@@ -1022,7 +1022,7 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
 
 ---
 
-**⚠️ Security Notice**: This is a demonstration project. For production use, ensure you:
+**Security Notice**: This is a demonstration project. For production use, ensure you:
 - Use strong, unique secrets
 - Enable all security features
 - Regularly update dependencies

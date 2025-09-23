@@ -1,4 +1,4 @@
-# 🔒 Secure File-Sharing REST API
+# Secure File-Sharing REST API
 
 A robust, secure file-sharing REST API built with Express.js and MongoDB, featuring comprehensive security measures, role-based access control, and advanced file management capabilities.
 
@@ -943,7 +943,7 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
    - [ ] File type validation
    - [ ] Directory traversal prevention
 
-## 🚀 Deployment
+## Deployment
 
 ### Docker Deployment
 
@@ -1007,7 +1007,7 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
    - Implement caching
    - Monitor performance metrics
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 - [ ] Virus scanning integration
 - [ ] File encryption at rest

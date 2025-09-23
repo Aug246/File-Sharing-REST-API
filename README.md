@@ -130,7 +130,27 @@ curl -X POST http://localhost:3000/api/auth/register \
     "username": "johndoe",
     "email": "john@example.com",
     "password": "SecurePass123!"
-  }'
+  }' | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+      "username": "johndoe",
+      "email": "john@example.com",
+      "role": "user",
+      "isActive": true,
+      "createdAt": "2025-09-23T00:24:49.830Z"
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
 ```
 
 #### Login
@@ -151,7 +171,26 @@ curl -X POST http://localhost:3000/api/auth/login \
   -d '{
     "usernameOrEmail": "johndoe",
     "password": "SecurePass123!"
-  }'
+  }' | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+      "username": "johndoe",
+      "email": "john@example.com",
+      "role": "user",
+      "isActive": true
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
 ```
 
 #### Refresh Token
@@ -170,7 +209,18 @@ curl -X POST http://localhost:3000/api/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "your-refresh-token"
-  }'
+  }' | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
 ```
 
 #### Logout
@@ -191,7 +241,15 @@ curl -X POST http://localhost:3000/api/auth/logout \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "your-refresh-token"
-  }'
+  }' | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
 ```
 
 ### File Management Endpoints
@@ -219,7 +277,40 @@ curl -X POST http://localhost:3000/api/files/upload \
   -F "file=@test-file.txt" \
   -F "description=File description" \
   -F "tags=tag1,tag2,tag3" \
-  -F "isPublic=false"
+  -F "isPublic=false" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "File uploaded successfully",
+  "data": {
+    "file": {
+      "_id": "68d1ea7ddc1b331d096ec97d",
+      "filename": "test-file.txt",
+      "storedFilename": "1758587517391_i6m8wt26zl.txt",
+      "mimetype": "text/plain",
+      "size": 28,
+      "owner": {
+        "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+        "username": "johndoe",
+        "email": "john@example.com"
+      },
+      "description": "File description",
+      "isPublic": false,
+      "downloadCount": 0,
+      "tags": ["tag1", "tag2", "tag3"],
+      "metadata": {
+        "uploadIP": "::1",
+        "userAgent": "curl/8.7.1",
+        "checksum": "d9192aa31791250d7e77c32c19231c3e465855cd2ce4ba5e4d2d94050d390834"
+      },
+      "createdAt": "2025-09-23T00:31:57.396Z",
+      "updatedAt": "2025-09-23T00:31:57.396Z"
+    }
+  }
+}
 ```
 
 #### Get User Files
@@ -240,15 +331,51 @@ Authorization: Bearer your-access-token
 ```bash
 # Get all user files
 curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10" \
-  -H "Authorization: Bearer your-access-token"
+  -H "Authorization: Bearer your-access-token" | jq .
 
 # Search by filename or description
 curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10&search=test" \
-  -H "Authorization: Bearer your-access-token"
+  -H "Authorization: Bearer your-access-token" | jq .
 
 # Search by tag
 curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10&tag=tag1" \
-  -H "Authorization: Bearer your-access-token"
+  -H "Authorization: Bearer your-access-token" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "data": {
+    "files": [
+      {
+        "_id": "68d1ea7ddc1b331d096ec97d",
+        "filename": "test-file.txt",
+        "storedFilename": "1758587517391_i6m8wt26zl.txt",
+        "mimetype": "text/plain",
+        "size": 28,
+        "owner": {
+          "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+          "username": "johndoe",
+          "email": "john@example.com"
+        },
+        "description": "File description",
+        "isPublic": false,
+        "downloadCount": 0,
+        "tags": ["tag1", "tag2", "tag3"],
+        "createdAt": "2025-09-23T00:31:57.396Z",
+        "updatedAt": "2025-09-23T00:31:57.396Z"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 1,
+      "totalFiles": 1,
+      "hasNextPage": false,
+      "hasPrevPage": false
+    }
+  }
+}
 ```
 
 #### Get Public Files
@@ -267,13 +394,49 @@ GET /api/files/public?page=1&limit=20&search=document&tag=pdf
 **Terminal Commands:**
 ```bash
 # Get all public files
-curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20"
+curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20" | jq .
 
 # Search public files by filename or description
-curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20&search=document"
+curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20&search=document" | jq .
 
 # Search public files by tag
-curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20&tag=pdf"
+curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20&tag=pdf" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "data": {
+    "files": [
+      {
+        "_id": "68d1ea7ddc1b331d096ec97d",
+        "filename": "document.pdf",
+        "storedFilename": "1758587517391_document.pdf",
+        "mimetype": "application/pdf",
+        "size": 1024,
+        "owner": {
+          "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+          "username": "johndoe",
+          "email": "john@example.com"
+        },
+        "description": "Public document",
+        "isPublic": true,
+        "downloadCount": 5,
+        "tags": ["pdf", "document", "public"],
+        "createdAt": "2025-09-23T00:31:57.396Z",
+        "updatedAt": "2025-09-23T00:31:57.396Z"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 1,
+      "totalFiles": 1,
+      "hasNextPage": false,
+      "hasPrevPage": false
+    }
+  }
+}
 ```
 
 #### Download File
@@ -287,6 +450,16 @@ Authorization: Bearer your-access-token
 curl -X GET http://localhost:3000/api/files/FILE_ID/download \
   -H "Authorization: Bearer your-access-token" \
   -o downloaded-file.txt
+
+# Check download status (optional)
+echo "Download completed. File saved as downloaded-file.txt"
+ls -la downloaded-file.txt
+```
+
+**Expected Output:**
+```bash
+Download completed. File saved as downloaded-file.txt
+-rw-r--r--  1 user  staff  28 Sep 23 00:54 downloaded-file.txt
 ```
 
 #### Update File Metadata
@@ -311,7 +484,25 @@ curl -X PUT http://localhost:3000/api/files/FILE_ID \
     "description": "Updated description",
     "tags": "updated,tags",
     "isPublic": true
-  }'
+  }' | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "File updated successfully",
+  "data": {
+    "file": {
+      "_id": "68d1ea7ddc1b331d096ec97d",
+      "filename": "test-file.txt",
+      "description": "Updated description",
+      "isPublic": true,
+      "tags": ["updated", "tags"],
+      "updatedAt": "2025-09-23T00:45:12.123Z"
+    }
+  }
+}
 ```
 
 #### Delete File
@@ -323,7 +514,15 @@ Authorization: Bearer your-access-token
 **Terminal Command:**
 ```bash
 curl -X DELETE http://localhost:3000/api/files/FILE_ID \
-  -H "Authorization: Bearer your-access-token"
+  -H "Authorization: Bearer your-access-token" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "File deleted successfully"
+}
 ```
 
 ### Admin Endpoints
@@ -337,7 +536,34 @@ Authorization: Bearer admin-access-token
 **Terminal Command:**
 ```bash
 curl -X GET "http://localhost:3000/api/admin/users?page=1&limit=20&search=john" \
-  -H "Authorization: Bearer admin-access-token"
+  -H "Authorization: Bearer admin-access-token" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+        "username": "johndoe",
+        "email": "john@example.com",
+        "role": "user",
+        "isActive": true,
+        "createdAt": "2025-09-23T00:24:49.830Z",
+        "lastLogin": "2025-09-23T00:50:36.795Z"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 1,
+      "totalUsers": 1,
+      "hasNextPage": false,
+      "hasPrevPage": false
+    }
+  }
+}
 ```
 
 #### Update User Status
@@ -358,7 +584,25 @@ curl -X PUT http://localhost:3000/api/admin/users/USER_ID/status \
   -H "Content-Type: application/json" \
   -d '{
     "isActive": false
-  }'
+  }' | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "User deactivated successfully",
+  "data": {
+    "user": {
+      "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+      "username": "johndoe",
+      "email": "john@example.com",
+      "role": "user",
+      "isActive": false,
+      "updatedAt": "2025-09-23T00:45:12.123Z"
+    }
+  }
+}
 ```
 
 #### Get System Statistics
@@ -370,7 +614,35 @@ Authorization: Bearer admin-access-token
 **Terminal Command:**
 ```bash
 curl -X GET http://localhost:3000/api/admin/stats \
-  -H "Authorization: Bearer admin-access-token"
+  -H "Authorization: Bearer admin-access-token" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "data": {
+    "users": {
+      "total": 5,
+      "active": 4,
+      "inactive": 1,
+      "admins": 1,
+      "regular": 4
+    },
+    "files": {
+      "total": 25,
+      "public": 10,
+      "private": 15,
+      "totalSize": 1048576,
+      "averageSize": 41943
+    },
+    "system": {
+      "uptime": "2 days, 5 hours",
+      "version": "1.0.0",
+      "environment": "production"
+    }
+  }
+}
 ```
 
 ### Basic Health Check Endpoints
@@ -382,7 +654,18 @@ GET /health
 
 **Terminal Command:**
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3000/health | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "Server is running",
+  "timestamp": "2025-09-23T00:55:40.811Z",
+  "environment": "development",
+  "uptime": "2 hours, 15 minutes"
+}
 ```
 
 #### API Information
@@ -392,7 +675,24 @@ GET /
 
 **Terminal Command:**
 ```bash
-curl http://localhost:3000/
+curl http://localhost:3000/ | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "Secure File-Sharing REST API",
+  "version": "1.0.0",
+  "environment": "development",
+  "timestamp": "2025-09-23T00:55:40.811Z",
+  "endpoints": {
+    "authentication": "/api/auth",
+    "files": "/api/files",
+    "admin": "/api/admin",
+    "health": "/health"
+  }
+}
 ```
 
 ### Complete Testing Workflow
@@ -506,7 +806,7 @@ You can use both parameters together:
 ```bash
 # Find files with "report" in name/description AND tagged with "pdf"
 curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
-  -H "Authorization: Bearer YOUR_TOKEN"
+  -H "Authorization: Bearer YOUR_TOKEN" | jq .
 ```
 
 ### Testing Tips
@@ -531,7 +831,7 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
 3. **Use environment variables for tokens:**
    ```bash
    export ACCESS_TOKEN="your-token-here"
-   curl -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:3000/api/files/my-files
+   curl -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:3000/api/files/my-files | jq .
    ```
 
 ## 🔧 Configuration
@@ -706,25 +1006,6 @@ curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
    - Use CDN for static files
    - Implement caching
    - Monitor performance metrics
-
-## 📝 License
-
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-If you have any questions or need help, please:
-- Open an issue on GitHub
-- Check the documentation
-- Review the code comments
 
 ## 🔮 Future Enhancements
 

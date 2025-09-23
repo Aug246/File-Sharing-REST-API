@@ -224,23 +224,55 @@ curl -X POST http://localhost:3000/api/files/upload \
 
 #### Get User Files
 ```http
-GET /api/files/my-files?page=1&limit=10&search=document
+GET /api/files/my-files?page=1&limit=10&search=test&tag=tag1
 Authorization: Bearer your-access-token
 ```
 
-**Terminal Command:**
+**Query Parameters:**
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 10)
+- `search`: Search in filename and description (optional)
+- `tag`: Search by specific tag (optional)
+- `sortBy`: Sort field (default: createdAt)
+- `sortOrder`: Sort order - asc or desc (default: desc)
+
+**Terminal Commands:**
 ```bash
-curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10&search=document" \
+# Get all user files
+curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10" \
+  -H "Authorization: Bearer your-access-token"
+
+# Search by filename or description
+curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10&search=test" \
+  -H "Authorization: Bearer your-access-token"
+
+# Search by tag
+curl -X GET "http://localhost:3000/api/files/my-files?page=1&limit=10&tag=tag1" \
   -H "Authorization: Bearer your-access-token"
 ```
 
 #### Get Public Files
 ```http
-GET /api/files/public?page=1&limit=20&tag=pdf
+GET /api/files/public?page=1&limit=20&search=document&tag=pdf
 ```
 
-**Terminal Command:**
+**Query Parameters:**
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 20)
+- `search`: Search in filename and description (optional)
+- `tag`: Search by specific tag (optional)
+- `sortBy`: Sort field (default: createdAt)
+- `sortOrder`: Sort order - asc or desc (default: desc)
+
+**Terminal Commands:**
 ```bash
+# Get all public files
+curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20"
+
+# Search public files by filename or description
+curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20&search=document"
+
+# Search public files by tag
 curl -X GET "http://localhost:3000/api/files/public?page=1&limit=20&tag=pdf"
 ```
 
@@ -412,6 +444,11 @@ echo "4. Listing user files..."
 curl -s -X GET http://localhost:3000/api/files/my-files \
   -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
 
+# 4b. Search files by tag
+echo "4b. Searching files by tag..."
+curl -s -X GET "http://localhost:3000/api/files/my-files?tag=test" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" | jq .
+
 # 5. Download file
 echo "5. Downloading file..."
 curl -s -X GET http://localhost:3000/api/files/$FILE_ID/download \
@@ -448,6 +485,28 @@ curl -s -X POST http://localhost:3000/api/auth/logout \
 rm -f test-file.txt downloaded-test-file.txt
 
 echo "Complete API workflow test finished!"
+```
+
+### Search Functionality
+
+The API provides two different search mechanisms:
+
+#### **Text Search (`?search=term`)**
+- Searches in **filename** and **description** fields only
+- Case-insensitive partial matching
+- Example: `?search=document` finds files with "document" in filename or description
+
+#### **Tag Search (`?tag=tagname`)**
+- Searches in the **tags** array
+- Exact tag matching (case-insensitive)
+- Example: `?tag=pdf` finds files tagged with "pdf"
+
+#### **Combined Usage**
+You can use both parameters together:
+```bash
+# Find files with "report" in name/description AND tagged with "pdf"
+curl -X GET "http://localhost:3000/api/files/my-files?search=report&tag=pdf" \
+  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### Testing Tips

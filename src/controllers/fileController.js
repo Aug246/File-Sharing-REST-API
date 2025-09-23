@@ -31,7 +31,7 @@ const uploadFile = async (req, res, next) => {
       size: req.file.size,
       owner: userId,
       description: description || '',
-      tags: tags ? tags.split(',').map(tag => tag.trim().toLowerCase()) : [],
+      tags: tags ? (Array.isArray(tags) ? tags.map(tag => tag.trim().toLowerCase()) : tags.split(',').map(tag => tag.trim().toLowerCase())) : [],
       isPublic: isPublic === 'true' || isPublic === true,
       metadata: {
         uploadIP: req.ip,

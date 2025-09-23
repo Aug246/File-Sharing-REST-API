@@ -92,13 +92,30 @@ const schemas = {
       .messages({
         'string.max': 'Description cannot exceed 500 characters'
       }),
-    tags: Joi.array()
-      .items(Joi.string().trim().max(50))
-      .max(10)
+    tags: Joi.alternatives()
+      .try(
+        Joi.array()
+          .items(Joi.string().trim().max(50))
+          .max(10),
+        Joi.string()
+          .max(500)
+          .custom((value, helpers) => {
+            // Convert comma-separated string to array for validation
+            const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            if (tags.length > 10) {
+              return helpers.error('custom.maxTags');
+            }
+            if (tags.some(tag => tag.length > 50)) {
+              return helpers.error('custom.tagTooLong');
+            }
+            return tags;
+          })
+      )
       .optional()
       .messages({
-        'array.max': 'Maximum 10 tags allowed',
-        'string.max': 'Each tag cannot exceed 50 characters'
+        'custom.maxTags': 'Maximum 10 tags allowed',
+        'custom.tagTooLong': 'Each tag cannot exceed 50 characters',
+        'string.max': 'Tags string too long'
       }),
     isPublic: Joi.boolean()
       .optional()

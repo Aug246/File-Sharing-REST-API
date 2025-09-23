@@ -318,7 +318,12 @@ const updateFile = async (req, res, next) => {
     // Update file metadata
     const updateData = {};
     if (description !== undefined) updateData.description = description;
-    if (tags !== undefined) updateData.tags = tags.split(',').map(tag => tag.trim().toLowerCase());
+    if (tags !== undefined) {
+      // Handle both array (from validation) and string formats
+      updateData.tags = Array.isArray(tags) 
+        ? tags.map(tag => tag.trim().toLowerCase()) 
+        : tags.split(',').map(tag => tag.trim().toLowerCase());
+    }
     if (isPublic !== undefined) updateData.isPublic = isPublic === 'true' || isPublic === true;
 
     const updatedFile = await File.findByIdAndUpdate(

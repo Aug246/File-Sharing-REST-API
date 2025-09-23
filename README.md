@@ -527,16 +527,63 @@ curl -X DELETE http://localhost:3000/api/files/FILE_ID \
 
 ### Admin Endpoints
 
+> **Note:** All admin endpoints require admin role authentication. First, you need to create an admin user or promote an existing user to admin role.
+
+#### Create Admin User (Database Method)
+To create your first admin user, run this Node.js script:
+
+```bash
+node -e "
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+async function makeAdmin() {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Connected to MongoDB');
+    
+    const User = require('./src/models/User');
+    const user = await User.findOneAndUpdate(
+      { username: 'johndoe' },
+      { role: 'admin' },
+      { new: true }
+    );
+    
+    if (user) {
+      console.log('✅ Successfully promoted johndoe to admin!');
+      console.log('User:', { username: user.username, email: user.email, role: user.role });
+    } else {
+      console.log('❌ User not found');
+    }
+    
+    await mongoose.disconnect();
+  } catch (error) {
+    console.error('Error:', error.message);
+    process.exit(1);
+  }
+}
+
+makeAdmin();
+"
+```
+
 #### Get All Users
 ```http
-GET /api/admin/users?page=1&limit=20&search=john
+GET /api/admin/users?page=1&limit=20&search=john&role=user&isActive=true
 Authorization: Bearer admin-access-token
 ```
 
+**Query Parameters:**
+- `page` (optional): Page number for pagination (default: 1)
+- `limit` (optional): Number of users per page (default: 20)
+- `search` (optional): Search by username or email
+- `role` (optional): Filter by role (`user` or `admin`)
+- `isActive` (optional): Filter by active status (`true` or `false`)
+
 **Terminal Command:**
 ```bash
-curl -X GET "http://localhost:3000/api/admin/users?page=1&limit=20&search=john" \
-  -H "Authorization: Bearer admin-access-token" | jq .
+curl -X GET "http://localhost:3000/api/admin/users?page=1&limit=20" \
+  -H "Authorization: Bearer ADMIN_TOKEN" | jq .
 ```
 
 **Expected Output:**
@@ -546,19 +593,39 @@ curl -X GET "http://localhost:3000/api/admin/users?page=1&limit=20&search=john" 
   "data": {
     "users": [
       {
+        "_id": "68d2c19972b14b75635218ea",
+        "username": "aug",
+        "email": "aug@example.com",
+        "role": "user",
+        "isActive": true,
+        "loginAttempts": 0,
+        "createdAt": "2025-09-23T15:49:45.167Z",
+        "updatedAt": "2025-09-23T15:49:45.454Z"
+      },
+      {
         "_id": "68d1e8d1e2a12c8ff3d0aa4b",
         "username": "johndoe",
         "email": "john@example.com",
+        "role": "admin",
+        "isActive": true,
+        "loginAttempts": 0,
+        "createdAt": "2025-09-23T00:24:49.503Z",
+        "lastLogin": "2025-09-23T15:48:02.340Z"
+      },
+      {
+        "_id": "68d1e19ee4a0fcc1e5459bef",
+        "username": "example",
+        "email": "example@example.com",
         "role": "user",
         "isActive": true,
-        "createdAt": "2025-09-23T00:24:49.830Z",
-        "lastLogin": "2025-09-23T00:50:36.795Z"
+        "createdAt": "2025-09-22T23:54:06.523Z",
+        "lastLogin": "2025-09-22T23:55:33.412Z"
       }
     ],
     "pagination": {
       "currentPage": 1,
       "totalPages": 1,
-      "totalUsers": 1,
+      "totalUsers": 3,
       "hasNextPage": false,
       "hasPrevPage": false
     }
@@ -566,7 +633,75 @@ curl -X GET "http://localhost:3000/api/admin/users?page=1&limit=20&search=john" 
 }
 ```
 
-#### Update User Status
+#### Get User Details
+```http
+GET /api/admin/users/:userId
+Authorization: Bearer admin-access-token
+```
+
+**Terminal Command:**
+```bash
+curl -X GET "http://localhost:3000/api/admin/users/68d2c19972b14b75635218ea" \
+  -H "Authorization: Bearer ADMIN_TOKEN" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "_id": "68d2c19972b14b75635218ea",
+      "username": "aug",
+      "email": "aug@example.com",
+      "role": "user",
+      "isActive": true,
+      "loginAttempts": 0,
+      "createdAt": "2025-09-23T15:49:45.167Z",
+      "updatedAt": "2025-09-23T15:49:45.454Z"
+    }
+  }
+}
+```
+
+#### Update User Role
+```http
+PUT /api/admin/users/:userId/role
+Authorization: Bearer admin-access-token
+Content-Type: application/json
+
+{
+  "role": "admin"
+}
+```
+
+**Terminal Command:**
+```bash
+curl -X PUT "http://localhost:3000/api/admin/users/68d2c19972b14b75635218ea/role" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"role": "admin"}' | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "User role updated successfully",
+  "data": {
+    "user": {
+      "_id": "68d2c19972b14b75635218ea",
+      "username": "aug",
+      "email": "aug@example.com",
+      "role": "admin",
+      "isActive": true,
+      "updatedAt": "2025-09-23T15:55:12.123Z"
+    }
+  }
+}
+```
+
+#### Update User Status (Activate/Deactivate)
 ```http
 PUT /api/admin/users/:userId/status
 Authorization: Bearer admin-access-token
@@ -579,12 +714,10 @@ Content-Type: application/json
 
 **Terminal Command:**
 ```bash
-curl -X PUT http://localhost:3000/api/admin/users/USER_ID/status \
-  -H "Authorization: Bearer admin-access-token" \
+curl -X PUT "http://localhost:3000/api/admin/users/68d2c19972b14b75635218ea/status" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "isActive": false
-  }' | jq .
+  -d '{"isActive": false}' | jq .
 ```
 
 **Expected Output:**
@@ -594,14 +727,109 @@ curl -X PUT http://localhost:3000/api/admin/users/USER_ID/status \
   "message": "User deactivated successfully",
   "data": {
     "user": {
-      "_id": "68d1e8d1e2a12c8ff3d0aa4b",
-      "username": "johndoe",
-      "email": "john@example.com",
+      "_id": "68d2c19972b14b75635218ea",
+      "username": "aug",
+      "email": "aug@example.com",
       "role": "user",
       "isActive": false,
-      "updatedAt": "2025-09-23T00:45:12.123Z"
+      "updatedAt": "2025-09-23T15:55:12.123Z"
     }
   }
+}
+```
+
+#### Delete User Account
+```http
+DELETE /api/admin/users/:userId
+Authorization: Bearer admin-access-token
+```
+
+**Terminal Command:**
+```bash
+curl -X DELETE "http://localhost:3000/api/admin/users/68d2c19972b14b75635218ea" \
+  -H "Authorization: Bearer ADMIN_TOKEN" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "User account deleted successfully"
+}
+```
+
+#### Get All Files (Admin View)
+```http
+GET /api/admin/files?page=1&limit=20&search=document&owner=USER_ID&isPublic=true
+Authorization: Bearer admin-access-token
+```
+
+**Query Parameters:**
+- `page` (optional): Page number for pagination (default: 1)
+- `limit` (optional): Number of files per page (default: 20)
+- `search` (optional): Search by filename or description
+- `owner` (optional): Filter by owner user ID
+- `isPublic` (optional): Filter by public status (`true` or `false`)
+
+**Terminal Command:**
+```bash
+curl -X GET "http://localhost:3000/api/admin/files?page=1&limit=20" \
+  -H "Authorization: Bearer ADMIN_TOKEN" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "data": {
+    "files": [
+      {
+        "_id": "68d1ea7ddc1b331d096ec97d",
+        "filename": "test-file.txt",
+        "storedFilename": "1758587517391_i6m8wt26zl.txt",
+        "mimetype": "text/plain",
+        "size": 28,
+        "owner": {
+          "_id": "68d1e8d1e2a12c8ff3d0aa4b",
+          "username": "johndoe",
+          "email": "john@example.com"
+        },
+        "description": "Updated description",
+        "isPublic": true,
+        "downloadCount": 1,
+        "tags": ["updated", "tags"],
+        "createdAt": "2025-09-23T00:31:57.396Z",
+        "updatedAt": "2025-09-23T15:41:02.989Z"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 1,
+      "totalFiles": 1,
+      "hasNextPage": false,
+      "hasPrevPage": false
+    }
+  }
+}
+```
+
+#### Delete Any User's File
+```http
+DELETE /api/admin/files/:fileId
+Authorization: Bearer admin-access-token
+```
+
+**Terminal Command:**
+```bash
+curl -X DELETE "http://localhost:3000/api/admin/files/68d1ea7ddc1b331d096ec97d" \
+  -H "Authorization: Bearer ADMIN_TOKEN" | jq .
+```
+
+**Expected Output:**
+```json
+{
+  "success": true,
+  "message": "File deleted successfully"
 }
 ```
 
@@ -614,7 +842,7 @@ Authorization: Bearer admin-access-token
 **Terminal Command:**
 ```bash
 curl -X GET http://localhost:3000/api/admin/stats \
-  -H "Authorization: Bearer admin-access-token" | jq .
+  -H "Authorization: Bearer ADMIN_TOKEN" | jq .
 ```
 
 **Expected Output:**
@@ -623,23 +851,23 @@ curl -X GET http://localhost:3000/api/admin/stats \
   "success": true,
   "data": {
     "users": {
-      "total": 5,
-      "active": 4,
-      "inactive": 1,
+      "total": 3,
+      "active": 3,
+      "inactive": 0,
       "admins": 1,
-      "regular": 4
+      "regular": 2
     },
     "files": {
-      "total": 25,
-      "public": 10,
-      "private": 15,
-      "totalSize": 1048576,
-      "averageSize": 41943
+      "total": 1,
+      "public": 1,
+      "private": 0,
+      "totalSize": 28,
+      "averageSize": 28
     },
     "system": {
-      "uptime": "2 days, 5 hours",
+      "uptime": "2 hours, 15 minutes",
       "version": "1.0.0",
-      "environment": "production"
+      "environment": "development"
     }
   }
 }
